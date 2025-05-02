@@ -208,6 +208,34 @@
           has) Rock crushes Scissors
         </span>
       </div>
+      <div
+        id="speed-control"
+        style="
+          width: 100%;
+          margin: 10px 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+        "
+      >
+        <label for="speed-slider" style="font-family: monospace; color: #172b36"
+          >Speed:</label
+        >
+        <input
+          type="range"
+          id="speed-slider"
+          min="1"
+          max="20"
+          value="5"
+          style="width: 200px"
+        />
+        <span
+          id="speed-value"
+          style="font-family: monospace; color: #172b36; min-width: 30px"
+          >5</span
+        >
+      </div>
       <canvas id="pongCanvas" width="800" height="800"></canvas>
 
       <div id="score"></div>
@@ -293,7 +321,22 @@
 
     const squares = [];
 
-    // Populate the fields, dividing the square into 5 equal parts
+    // Add speed slider control
+    const speedSlider = document.getElementById('speed-slider');
+    const speedValue = document.getElementById('speed-value');
+
+    // Update speed value display when slider changes
+    speedSlider.addEventListener('input', function () {
+      speedValue.textContent = this.value;
+    });
+
+    function getMinSpeed() {
+      return parseInt(speedSlider.value);
+    }
+
+    function getMaxSpeed() {
+      return parseInt(speedSlider.value) * 2;
+    }
 
     // Populate the fields, dividing the square into 5 equal parts
     for (let i = 0; i < numSquaresX; i++) {
@@ -330,7 +373,9 @@
     ];
 
     function startSpeed() {
-      return (MIN_SPEED + MAX_SPEED) / 2.0 + Math.random() - 0.5;
+      const minSpeed = getMinSpeed();
+      const maxSpeed = getMaxSpeed();
+      return (minSpeed + maxSpeed) / 2.0 + Math.random() - 0.5;
     }
 
     const balls = [
@@ -454,15 +499,18 @@
       ball.dx += Math.random() * 0.02 - 0.01;
       ball.dy += Math.random() * 0.02 - 0.01;
 
+      const maxSpeed = getMaxSpeed();
+      const minSpeed = getMinSpeed();
+
       // Limit the speed of the ball
-      ball.dx = Math.min(Math.max(ball.dx, -MAX_SPEED), MAX_SPEED);
-      ball.dy = Math.min(Math.max(ball.dy, -MAX_SPEED), MAX_SPEED);
+      ball.dx = Math.min(Math.max(ball.dx, -maxSpeed), maxSpeed);
+      ball.dy = Math.min(Math.max(ball.dy, -maxSpeed), maxSpeed);
 
       // Make sure the ball always maintains a minimum speed
-      if (Math.abs(ball.dx) < MIN_SPEED)
-        ball.dx = ball.dx > 0 ? MIN_SPEED : -MIN_SPEED;
-      if (Math.abs(ball.dy) < MIN_SPEED)
-        ball.dy = ball.dy > 0 ? MIN_SPEED : -MIN_SPEED;
+      if (Math.abs(ball.dx) < minSpeed)
+        ball.dx = ball.dx > 0 ? minSpeed : -minSpeed;
+      if (Math.abs(ball.dy) < minSpeed)
+        ball.dy = ball.dy > 0 ? minSpeed : -minSpeed;
     }
 
     function ballLocation(ball) {
