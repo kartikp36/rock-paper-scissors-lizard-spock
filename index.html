@@ -226,7 +226,7 @@
           type="range"
           id="speed-slider"
           min="1"
-          max="20"
+          max="16"
           value="5"
           style="width: 200px"
         />
@@ -235,6 +235,21 @@
           style="font-family: monospace; color: #172b36; min-width: 30px"
           >5</span
         >
+
+        <!-- Power-up toggle -->
+        <label
+          style="
+            font-family: monospace;
+            color: #172b36;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-left: 20px;
+          "
+        >
+          <input type="checkbox" id="powerup-toggle" checked />
+          Power-Ups
+        </label>
       </div>
       <canvas id="pongCanvas" width="800" height="800"></canvas>
 
@@ -496,6 +511,9 @@
     }
 
     function addRandomness(ball) {
+      // Skip randomness if ball is frozen or slowed
+      if (ball.isFrozen || ball.isSlowed) return;
+
       ball.dx += Math.random() * 0.02 - 0.01;
       ball.dy += Math.random() * 0.02 - 0.01;
 
@@ -580,11 +598,214 @@
       );
     }
 
+    // Power-Up Implementation
+    const POWER_UP_TYPES = [
+      { type: 'speed', icon: '🚀', color: '#FF6B6B' },
+      { type: 'slow', icon: '🐢', color: '#4ECDC4' },
+      { type: 'freeze', icon: '❄️', color: '#A8DADC' },
+    ];
+
+    let powerUps = [];
+    const POWER_UP_SIZE = SQUARE_SIZE * 2;
+    const POWER_UP_DURATION = 10000; // 10 seconds
+    const POWER_UP_SPAWN_CHANCE = 0.005; // 0.5% chance per frame
+
+    // Get power-up toggle element
+    const powerUpToggle = document.getElementById('powerup-toggle');
+
+    function maybeSpawnPowerUp() {
+      // Only spawn if power-ups are enabled
+      if (!powerUpToggle.checked) return;
+
+      if (Math.random() < POWER_UP_SPAWN_CHANCE) {
+        const type =
+          POWER_UP_TYPES[Math.floor(Math.random() * POWER_UP_TYPES.length)];
+        powerUps.push({
+          x: Math.random() * (canvas.width - POWER_UP_SIZE),
+          y: Math.random() * (canvas.height - POWER_UP_SIZE),
+          type: type.type,
+          icon: type.icon,
+          color: type.color,
+          active: true,
+          spawnTime: Date.now(),
+        });
+      }
+    }
+
+    function drawPowerUps() {
+      // Only draw if power-ups are enabled
+      if (!powerUpToggle.checked) return;
+
+      powerUps.forEach((pu) => {
+        // Draw colored circle background
+        // ctx.beginPath();
+        // ctx.arc(
+        //   pu.x + POWER_UP_SIZE / 2,
+        //   pu.y + POWER_UP_SIZE / 2,
+        //   POWER_UP_SIZE / 2,
+        //   0,
+        //   Math.PI * 2
+        // );
+        // ctx.fillStyle = pu.color;
+        // ctx.fill();
+
+        // Draw larger emoji icon
+        ctx.font = `${POWER_UP_SIZE * 0.8}px serif`; // Much larger font size
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'white';
+
+        // Add a subtle shadow for depth
+        ctx.shadowColor = 'rgba(0,0,0,0.3)';
+        ctx.shadowBlur = 5;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 2;
+
+        ctx.fillText(
+          pu.icon,
+          pu.x + POWER_UP_SIZE / 2,
+          pu.y + POWER_UP_SIZE / 2 + POWER_UP_SIZE * 0.1
+        );
+
+        // Reset shadow
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+      });
+    }
+
+    function checkPowerUpCollisions() {
+      // Skip collision checks if power-ups are disabled
+      if (!powerUpToggle.checked) return;
+
+      balls.forEach((ball) => {
+        powerUps.forEach((pu, idx) => {
+          if (
+            ball.x > pu.x &&
+            ball.x < pu.x + POWER_UP_SIZE &&
+            ball.y > pu.y &&
+            ball.y < pu.y + POWER_UP_SIZE
+          ) {
+            applyPowerUp(ball, pu.type);
+            powerUps.splice(idx, 1); // Remove power-up
+          }
+        });
+      });
+    }
+
+    function applyPowerUp(ball, type) {
+      switch (type) {
+        case 'speed':
+          ball.originalDx = ball.dx;
+          ball.originalDy = ball.dy;
+          ball.dx *= 8;
+          ball.dy *= 8;
+          setTimeout(() => {
+            ball.dx = ball.originalDx;
+            ball.dy = ball.originalDy;
+          }, POWER_UP_DURATION);
+          break;
+
+        case 'slow':
+          console.log('Slow power-up activated!');
+          console.log('Before slow:', {
+            dx: ball.dx,
+            dy: ball.dy,
+          });
+
+          // Store original speed
+          ball.slowedDx = ball.dx;
+          ball.slowedDy = ball.dy;
+
+          // Reduce speed significantly
+          ball.dx /= 4; // More dramatic slow effect
+          ball.dy /= 4;
+
+          // Add a flag to track slowed state
+          ball.isSlowed = true;
+
+          console.log('After slow:', {
+            dx: ball.dx,
+            dy: ball.dy,
+          });
+
+          setTimeout(() => {
+            // Restore speed only if the ball is still slowed
+            if (ball.isSlowed) {
+              console.log('Restoring ball speed');
+              ball.dx = ball.slowedDx;
+              ball.dy = ball.slowedDy;
+              ball.isSlowed = false;
+
+              console.log('After restoration:', {
+                dx: ball.dx,
+                dy: ball.dy,
+              });
+            }
+          }, POWER_UP_DURATION);
+          break;
+
+        case 'freeze':
+          console.log('Freeze power-up activated!');
+          console.log('Before freeze:', {
+            dx: ball.dx,
+            dy: ball.dy,
+          });
+
+          // Store original speed
+          ball.frozenDx = ball.dx;
+          ball.frozenDy = ball.dy;
+
+          // Completely stop the ball
+          ball.dx = 0;
+          ball.dy = 0;
+
+          console.log('After freeze:', {
+            dx: ball.dx,
+            dy: ball.dy,
+          });
+
+          // Use a flag to track frozen state
+          ball.isFrozen = true;
+
+          setTimeout(() => {
+            // Restore speed only if the ball is still frozen
+            if (ball.isFrozen) {
+              console.log('Restoring ball speed');
+              ball.dx = ball.frozenDx;
+              ball.dy = ball.frozenDy;
+              ball.isFrozen = false;
+
+              console.log('After restoration:', {
+                dx: ball.dx,
+                dy: ball.dy,
+              });
+            }
+          }, POWER_UP_DURATION);
+          break;
+      }
+    }
+
+    function cleanupPowerUps() {
+      // Skip cleanup if power-ups are disabled
+      if (!powerUpToggle.checked) return;
+
+      const now = Date.now();
+      powerUps = powerUps.filter((pu) => now - pu.spawnTime < 10000);
+    }
+
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawSquares();
 
       scoreElement.innerHTML = scoreText();
+
+      // Power-up logic
+      maybeSpawnPowerUp();
+      drawPowerUps();
+      checkPowerUpCollisions();
+      cleanupPowerUps();
 
       if (
         ballsAreNeighbors(balls[0], balls[1]) ||
