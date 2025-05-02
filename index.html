@@ -12,6 +12,11 @@
     <link rel="author" href="https://koenvangilst.nl" />
     <meta name="theme-color" content="#172B36" />
     <meta name="creator" content="Koen van Gilst" />
+    <script
+      defer
+      data-domain="pong-wars.koenvangilst.nl"
+      src="https://plausible.koenvangilst.nl/js/script.js"
+    ></script>
     <style>
       html {
         height: 100%;
@@ -440,8 +445,8 @@
     }
 
     function addRandomness(ball) {
-      ball.dx += Math.random() * 0.01 - 0.005;
-      ball.dy += Math.random() * 0.01 - 0.005;
+      ball.dx += Math.random() * 0.02 - 0.01;
+      ball.dy += Math.random() * 0.02 - 0.01;
 
       // Limit the speed of the ball
       ball.dx = Math.min(Math.max(ball.dx, -MAX_SPEED), MAX_SPEED);
@@ -563,7 +568,8 @@
       requestAnimationFrame(draw);
     }
 
-    requestAnimationFrame(draw);
+    const FRAME_RATE = 100;
+    setInterval(draw, 1000 / FRAME_RATE);
   </script>
   <script>
     let dialog = document.getElementById('mydialog');
