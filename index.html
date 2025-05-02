@@ -196,7 +196,7 @@
             target="_blank"
             style="text-decoration: none; color: #172b36"
           >
-            Stone, Paper, Scissors, Lizard, Spock</a
+            Rock, Paper, Scissors, Lizard, Spock</a
           >
         </h2>
         <!-- Tooltip text -->
@@ -244,21 +244,27 @@
     */
 
     const gameColors = [
-      '#F5D4D5', //stone
+      '#F5D4D5', //rock
       '#FEF6D5', //paper
       '#F2D5FF', //scissors
       '#D7F4D7', //lizard
       '#D5E4FF', //spock
     ];
     const ballColorCodes = [
-      '#E8868E', //stone
+      '#E8868E', //rock
       '#FCDF58', //paper
       '#E07FFE', //scissors
       '#8EDE96', //lizard
       '#81B3FF', //spock
     ];
 
-    const gameColorNames = ['stone', 'paper', 'lizard', 'scissors', 'spock'];
+    const gameColorNames = [
+      '🪨rock',
+      '📰paper',
+      '✂️scissors',
+      '🦎lizard',
+      '🖖spock',
+    ];
 
     const colorScores = Array(gameColors.length).fill(0);
 
@@ -564,8 +570,6 @@
 
       iteration++;
       if (iteration % 1_000 === 0) console.log(`iteration ${iteration}`);
-
-      requestAnimationFrame(draw);
     }
 
     const FRAME_RATE = 100;

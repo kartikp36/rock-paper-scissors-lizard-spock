@@ -14,7 +14,7 @@ Spock vaporizes Rock
 
 It's the eternal battle between Rock, Paper, Scissors, Lizard & Spock. Written in JavaScript with some HTML & CSS in one index.html. Feel free to reuse the code and create your own version.
 
-[Stone, Paper, Scissors, Lizard, Spock.webm](https://github.com/kartikp36/stone-paper-scissors-lizard-spock/assets/36930635/5b42786b-e1ab-4cc0-8852-7f16e2cafe55)
+[Rock, Paper, Scissors, Lizard, Spock.webm](https://github.com/kartikp36/stone-paper-scissors-lizard-spock/assets/36930635/5b42786b-e1ab-4cc0-8852-7f16e2cafe55)
 
 ## Development
 
